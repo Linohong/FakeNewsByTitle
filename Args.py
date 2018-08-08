@@ -3,8 +3,9 @@ import argparse
 # ARGUMENT PART
 parser = argparse.ArgumentParser(description='FakeNewsByTitle Argument Parser')
 # option
-parser.add_argument('-no_gpu', type=bool, default=False, help='disable the gpu')
+parser.add_argument('-device', type=str, default='cpu', help='cpu/cuda')
 parser.add_argument('-predefined', type=bool, default=False, help='enable/disable predefined word embedding')
+
 
 # model
 parser.add_argument('-hidden_size', type=int, default=300)

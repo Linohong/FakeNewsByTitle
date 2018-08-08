@@ -23,30 +23,62 @@ class NewsDataset(Dataset):
             data_path (string): Directory with all the News Data with binary form.
             formed_examples (generator) : generator of tuples with form : (article_list, abstract_list)
         """
-        self.formed_examples = self.form_data_set(formed_examples) # list of dictionaries of article, abstract pair
+        self.device = torch.device(Args.args.device)
+        self.formed_examples = self.__getProperExamples__(formed_examples) # list of dictionaries of article, abstract pair
         self.Vocab = Vocab
-        self.tensored_examples = self.tensor_examples(self.formed_examples) # examples that are tensored
+        self.indexed_examples = self.index_examples(self.formed_examples, tensor=False)
+        # self.tensored_examples = self.tensor_examples(self.formed_examples) # examples that are tensored
 
     def __len__(self):
         return len(self.formed_examples)
 
-    def __getitem__(self, doc_idx, sent_idx=None):
+    def __getitem__(self, doc_idx):
         ''' 
             - Highly recommended to use this function to  
             search out those of which don't meet the constraints
         '''
-        example = self.tensored_examples[doc_idx]
-        if self.__is_proper_doc__(example, 'article') is not True or self.__is_proper_doc__(example, 'abstract') is not True : # if not proper number of sentences in the article nor abstract
-            return None
-        if self.__is_proper_sents__(example['article']) is not True or self.__is_proper_sents__(example['abstract']) is not True : # if not proper number of words in a sentences of article nor abstract
-            return None
+        # example = self.tensored_examples[doc_idx]
+        example = self.indexed_examples[doc_idx]
+        return example
 
 
-        if sent_idx is None : # only return the document
-            return example
-        else : # if sentence number is specified return the specific sentence
-            return example[sent_idx]
+    def __get_TrainLoader__(self) :
+        '''
+            :return: TrainLoader with data that are properly selected according to the hyper-parameters
+        '''
+        # train_article = []
+        # train_abstract = []
+        # train_output = []
+        #
+        # for i in range(self.__len__()) :
+        #     example = self.__getitem__(i)
+        #     if example is None : continue
+        #     else :
+        #         train_article.append(example['article'])
+        #         train_abstract.append(example['abstract'])
+        #         train_output.append(example['label']) # 1 or 0
 
+        # train_data = torch.utils.data.TensorDataset(train_input, train_output)
+        # train_data = torch.utils.data.TensorDataset(train_article, train_abstract, train_output)
+        # trainloader = DataLoader(train_data, batch_size=self.batch_size, shuffle=False, num_workers=32)
+        #
+        # return trainloader
+
+    def __getProperExamples__(self, formed_examples) :
+        Proper_Examples = []
+        for example in formed_examples :
+            if self.__is_proper_doc__(example, 'article') is not True :
+                continue
+            if self.__is_proper_doc__(example,'abstract') is not True :  # if not proper number of sentences in the article nor abstractreturn None
+                continue
+            if self.__is_proper_sents__(example['article']) is not True :
+                continue
+            if self.__is_proper_sents__(example['abstract']) is not True :  # if not proper number of words in a sentences of article nor abstract
+                continue
+
+            Proper_Examples.append(example)
+
+        return Proper_Examples
 
     def __is_proper_doc__(self, tensored_example, type) :
         '''
@@ -69,7 +101,7 @@ class NewsDataset(Dataset):
         '''
         max = Args.args.max_sent
         for sent in tensored_examples :
-            if len(sent) > max  :
+            if len(sent.split()) > max  :
                 return False
 
         return True
@@ -103,21 +135,15 @@ class NewsDataset(Dataset):
         return proper_abs_sents
 
 
-    def form_data_set(self, generator) :
-        Examples = []
-        for (article_list, abstract_list) in generator :
-            example = {'article':article_list, 'abstract':abstract_list}
-            Examples.append(example)
-
-        return Examples
-
-    def tensor_examples(self, Examples) :
-        tensored_examples = []
+    def index_examples(self, Examples, tensor=False) :
+        indexed_examples = []
         for example in Examples :
             article_list = example['article']
             abstract_list = example['abstract']
+            label = example['label'] # TODO) label must be added
 
-            tensored_article = []
+            # tensor article
+            indexed_article = []
             for sent in article_list :
                 cur_sent = sent.split()
                 result = []
@@ -127,11 +153,15 @@ class NewsDataset(Dataset):
                     except KeyError:
                         result.append(self.Vocab._word_to_id[DP.UNKNOWN_TOKEN])
                 result = self.sent_zero_padding(result, Args.args.max_sent)
-                result = torch.tensor(result, requires_grad=True)
-                tensored_article.append(result)
-            tensored_article = self.doc_zero_padding(tensored_article, 'article', 'front')
+                indexed_article.append(result)
 
-            tensored_abstract = []
+            indexed_article = self.doc_zero_padding(indexed_article, 'article', 'front', tensor=False)
+            if tensor is True:
+                indexed_article = torch.tensor(indexed_article, requires_grad=True, device=self.device)
+
+
+            # tensor abstract
+            indexed_abstract = []
             for sent in abstract_list :
                 cur_sent = sent.split()
                 result = []
@@ -141,13 +171,18 @@ class NewsDataset(Dataset):
                     except KeyError :
                         result.append(self.Vocab._word_to_id[DP.UNKNOWN_TOKEN])
                 result = self.sent_zero_padding(result, Args.args.max_sent)
-                result = torch.tensor(result, requires_grad=True)
-                tensored_abstract.append(result)
-            tensored_abstract = self.doc_zero_padding(tensored_abstract, 'abstract', 'front')
+                indexed_abstract.append(result)
 
-            tensored_examples.append({'article':tensored_article, 'abstract':tensored_abstract})
+            indexed_abstract = self.doc_zero_padding(indexed_abstract, 'abstract', 'front')
+            if tensor is True :
+                indexed_abstract = torch.tensor(indexed_abstract, requires_grad=True, device=self.device)
 
-        return tensored_examples
+            # tensor label (1/0)
+            indexed_label = torch.tensor([label], requires_grad=True, device=self.device) if tensor is True else [label]
+
+            indexed_examples.append({'article':indexed_article, 'abstract':indexed_abstract, 'label':indexed_label})
+
+        return indexed_examples
 
     def sent_zero_padding(self, input, max_len) :
         '''
@@ -162,24 +197,27 @@ class NewsDataset(Dataset):
 
         return result
 
-    def doc_zero_padding(self, tensored_example, type, position) :
+    def doc_zero_padding(self, tensored_example, type, position, tensor=False) :
         '''
             :param sent_hiddens : subject to be padded.
-            :param position : position of the padding. front / back  
+            :param type : article/ abstract
+            :param position : position of the padding. front / back
+            :param tensor : tensor or just index 
             :return: padded document of sentences
         '''
         sent_num = Args.args.sent_num if type is 'article' else Args.args.abs_num
         max_sent = Args.args.max_sent
         length = len(tensored_example)
+
         pad_token = DP.PAD_TOKEN
         pads = [self.Vocab._word_to_id[pad_token] for _ in range(max_sent)]
-        pads = torch.tensor(pads, requires_grad=True)
 
         for _ in range(sent_num - length):
             if (position == 'back'):
                 tensored_example.append(pads)
             elif (position == 'front'):
                 tensored_example = [pads] + tensored_example
+
 
         return tensored_example
 

@@ -13,21 +13,20 @@ Vocab = DP.Vocab(Args.args.voca_path, Args.args.vocab_size)
 # Call DataSet
 print("Obtaining Dataset .... ", end='')
 data_examples_gen = DP.form_examples(Args.args.data_path, Args.args.train_size) # generator of article, abstract pair
-dataset = DS.NewsDataset(data_examples_gen, Vocab) # dataset defined
+DataManager = DS.NewsDataset(data_examples_gen, Vocab) # dataset defined
 print("Done !!!")
 
 
 # Define Model
-# sentCNN = Model.CnnEnc(Vocab)
-sentRNN = Model.DocEnc(Vocab)
-# train = []
-# label = []
-for i in range(5) :
-    sample = dataset.__getitem__(i) # (article, abstract)
-    if sample == None : continue
-    # train.append(sample['article'])
-    # label.append(sample['abstract'])
-    output = sentRNN(sample['article'])
+SCORENET = Model.ScoringNetwork(Vocab)
+trainloader = torch.utils.data.DataLoader(DataManager, batch_size=Args.args.batch_size, shuffle=True, num_workers=32)
+
+for mini_batch in trainloader :
+    print(mini_batch['article'])
+    #print(mini_batch['abstract'][0].shape)
+    #print(mini_batch['label'][0].shape)
+    # output = SCORENET(batch_articles, batch_abstracts, batch_labels)
+
 
 
 # train_data = torch.utils.data.TensorDataset(train, label)

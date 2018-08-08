@@ -112,19 +112,41 @@ def form_examples(data_path, max=None):
     """Reads data from file and processes into Examples which are then placed into the example queue."""
 
     input_gen = text_generator(example_generator(data_path, max))
+    Examples = []
 
     for (article, abstract) in input_gen:  # read the next example from file. article and abstract are both strings.
         abstract_list = [sent.strip() for sent in abstract2sents(
             abstract.decode("utf-8"))]  # abstract is byte type in python3, so convert it to a string type
                                         # Use the <s> and </s> tags in abstract to get a list of sentences.
         article_list = sent_tokenize(article.decode("utf-8"))
+        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':1})
 
-        yield (article_list, abstract_list)
+    # Labelize Examples
+    Examples = labelize_examples(Examples)
 
-
+    return Examples
         # abstract_sentences = [sent.strip() for sent in abstract2sents(abstract)]  # Use the <s> and </s> tags in abstract to get a list of sentences.
         # example = Example(article, abstract_sentences, self._vocab, self._hps)  # Process into an Example.
         # self._example_queue.put(example)  # place the Example in the example queue.
+
+def labelize_examples(formed_examples, fake_num=None) :
+    '''
+        :param formed_examples: examples list with article and abstract pair 
+        :param fake_num: the number of fake news to be made 
+        :return: labelized examples
+    '''
+    if fake_num == None :
+        fake_num = int(len(formed_examples) / 2)
+        fake_num = fake_num-1 if fake_num % 2 is not 0 else fake_num
+
+    for i in range(fake_num) :
+        formed_examples[i]['abstract'], formed_examples[fake_num-i-1]['abstract'] = \
+            formed_examples[fake_num-i-1]['abstract'], formed_examples[i]['abstract'] # swap their abstract
+
+        formed_examples[i]['label'] = formed_examples[fake_num-i-1]['label'] = 0
+
+    return formed_examples
+
 
 
 def article2ids(article_words, vocab):

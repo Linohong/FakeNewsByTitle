@@ -47,9 +47,6 @@ class CnnEnc(nn.Module) :
         # if (type == 'sent') :
         x = self.embeddings(x).view(-1, 1, self.max_sent, self.embed_dim) # batch size sets to -1 for flexibility
 
-        # elif (type == 'doc') :
-        #     x = x.view(-1, 1, self.max_sent, self.hidden_size)
-
         # Max pooling over a (2, 2) window
         maxed_conv1 = F.max_pool2d(F.relu(self.conv1(x)), (self.max_sent-2, 1) ) # second argument for the max-pooling size
         maxed_conv2 = F.max_pool2d(F.relu(self.conv2(x)), (self.max_sent-3, 1) )
@@ -102,20 +99,21 @@ class DocEnc(nn.Module) :
         sent_hiddens = []
         # inputs = sorted(inputs, reverse=True)
 
-        for i in range(len(inputs)) :
-            sent_hiddens.append(self.sentEncoder(inputs[i])) # (TODO) must consider notion of mini_batch
+        for i in range(self.sent_num) :
+            sent_hiddens.append(self.sentEncoder(inputs[:][i])) # (TODO) must consider notion of mini_batch
         sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
         # rnn.pack_padded_sequence(sent_hiddens)
 
 
-        doc_outs, _ = self.DocEncoder(sent_hiddens) # encoder_out : [b x sent_num x hid*2]
-        attn = torch.bmm(doc_outs, self.attnHidden)
-        # attn = F.softmax(attn.view(-1, doc_outs.size(1)), dim=1).view(self.batch_size, -1, doc_outs.size(1))
-        dist = F.softmax(attn, dim=1) # probability distribution
-        c = torch.bmm(dist, doc_outs)
-        # combined = torch.cat(c, doc_outs[D.sentNum - 1], dim=2)
+        sent_hiddens, _ = self.DocEncoder(sent_hiddens) # encoder_out : [b x sent_num x hid*2]
+        doc_hidden = sent_hiddens.transpose(0,1)[-1][:] # tranpose operation necessary for accessing problem in python
 
-        return sent_hiddens, c # (TODO) consider if return the last or whole outputs
+        # attention mechanism
+        scores = torch.bmm(sent_hiddens, self.attnHidden)
+        attn = F.softmax(scores, dim=1) # probability distribution
+        attn_sent_hiddens = torch.mul(attn.expand_as(sent_hiddens), sent_hiddens)
+
+        return attn_sent_hiddens, doc_hidden # (TODO) consider if return the last or whole outputs
 
 
 
@@ -123,10 +121,21 @@ class ScoringNetwork(nn.Module) :
     '''
         Scoring Network 
     '''
-    def __init__(self) :
+    def __init__(self, Vocab) :
         super(ScoringNetwork, self).__init__()
-        self.titleEnc = CnnEnc()
-        self.DocEncoder = DocEnc()
+        self.sent_num = Args.args.sent_num
+        self.CnnEnc = CnnEnc(Vocab)
+        self.DocEncoder = DocEnc(Vocab)
 
-    def forward(self, sentNum, inputs, title) :
-        sent_hiddens, doc_outs = DocEnc(sentNum, inputs)
+    def forward(self, articles, abstracts, labels) :
+        attn_sent_hiddens, doc_hiddens = self.DocEncoder(articles)
+        abs_hiddens = []
+        for abs in abstracts :
+            abs_hiddens.append(self.CnnEnc(abs))  # TODO) must consider notion of mini_batch
+        abs_hiddens = torch.stack(abs_hiddens).view(-1, len(abs_hiddens), self.hidden_size)  # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+
+        scores_s = torch.bmm(abs_hiddens.expand_as(attn_sent_hiddens), attn_sent_hiddens)
+        scores_d = torch.bmm(abs_hiddens,  doc_hiddens)
+
+        return scores_s + scores_d
+
