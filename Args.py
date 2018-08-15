@@ -3,7 +3,7 @@ import argparse
 # ARGUMENT PART
 parser = argparse.ArgumentParser(description='FakeNewsByTitle Argument Parser')
 # option
-parser.add_argument('-device', type=str, default='cpu', help='cpu/cuda')
+parser.add_argument('-device', type=str, default='cuda', help='cpu/cuda')
 parser.add_argument('-predefined', type=bool, default=False, help='enable/disable predefined word embedding')
 parser.add_argument('-score', type=float, help='score threshold')
 
@@ -36,7 +36,7 @@ parser.add_argument('-data_path', type=str, default='./Data/finished_files/chunk
 parser.add_argument('-voca_path', type=str, default='./Data/finished_files/vocab', help='vocab location relative to the main file')
 parser.add_argument('-embed_path', type=str, default='../GoogleNewsVec/GoogleNews-vectors-negative300.bin')
 parser.add_argument('-vocab_size', type=int, default=50000, help='size of the unique vocabulary')
-parser.add_argument('-train_size', type=int, default=3000, help='train size')
+parser.add_argument('-train_size', type=int, default=100, help='train size')
 parser.add_argument('-task', type=str, default='train')
 parser.add_argument('-files_to_read', type=int, default=10, help='the number of files to read for test data')
 parser.add_argument('-eval_size', type=int, default=100000, help='eval_size of inputs to be evaluated')

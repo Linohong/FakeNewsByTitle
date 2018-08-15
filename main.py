@@ -22,10 +22,10 @@ TE.timeCheck('s', stime)
 data_examples_gen = DP.form_examples(Args.args.data_path, Args.args.train_size) # generator of article, abstract pair
 DataManager = DS.NewsDataset(data_examples_gen, Vocab) # dataset defined
 del data_examples_gen
-trainloader = torch.utils.data.DataLoader(DataManager, batch_size=Args.args.batch_size, shuffle=True, num_workers=0)
+trainloader = DataManager.get_trainloader('train', Args.args.batch_size)
 print("Done !!!", end='     ')
+print(DataManager.portion)
 TE.timeCheck('e', stime)
-
 
 
 # Define Model
@@ -40,6 +40,7 @@ TE.timeCheck('e', stime)
 # Training Model
 print("Training Model .... ")
 TE.timeCheck('s', stime)
+trainloader = DataManager.get_trainloader('test', Args.args.batch_size)
 Train.Train(trainloader, SCORENET)
 print("Done Training !!!", end= '    ')
 TE.timeCheck('e', stime)
@@ -48,14 +49,15 @@ TE.timeCheck('e', stime)
 
 # Save Model
 print("Saving Model .... ", end='')
-torch.save(SCORENET, './' + Args.args.model_name)
+torch.save(SCORENET, './SavedModel/' + Args.args.model_name)
 print("Done !!!")
 
 
 # Evaluation
+# SCORENET = torch.load('./SavedModel/ScoreAdam')
 print("Evaluating .... ")
 TE.timeCheck('s', stime)
 Evaluation.Evaluation(trainloader, SCORENET)
-print("Done Training !!!", end= '    ')
+print("Done Evaluating !!!", end= '    ')
 TE.timeCheck('e', stime)
 

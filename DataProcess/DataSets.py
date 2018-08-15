@@ -23,25 +23,44 @@ class NewsDataset(Dataset):
             data_path (string): Directory with all the News Data with binary form.
             formed_examples (generator) : generator of tuples with form : (article_list, abstract_list)
         """
+        self.set = 'train' # train/validation/test
+        self.portion ={'train':80, 'validation':10, 'test':10} #train/validation/test
+        self.startIdx = {'train':0, 'validation':0, 'test':0}
         self.device = torch.device(Args.args.device)
         self.formed_examples = self.__getProperExamples__(formed_examples) # list of dictionaries of article, abstract pair
         self.Vocab = Vocab
         self.indexed_examples = self.index_examples(self.formed_examples, tensor=True)
+        self.setIdxes()
 
     def __len__(self):
-        return len(self.indexed_examples)
+
+        if self.set is 'train' :
+            return self.portion['train']
+
+        elif self.set is 'validatoin' :
+            return self.portion['validation']
+
+        elif self.set is 'test' :
+            return self.portion['test']
+        # return len(self.indexed_examples)
 
     def __getitem__(self, doc_idx):
         ''' 
             - Highly recommended to use this function to  
             search out those of which don't meet the constraints
         '''
-        # example = self.tensored_examples[doc_idx]
-        example = self.indexed_examples[doc_idx]
-        # example['article'] = example['article'][:2]
+        # example = self.indexed_examples[doc_idx]
+        if self.set is 'train' :
+            prev = 0
 
+        elif self.set is 'validation' :
+            prev = self.portion['train']
+
+        elif self.set is 'test' :
+            prev = self.portion['train'] + self.portion['validation']
+
+        example = self.indexed_examples[prev + doc_idx]
         return example
-
 
     def __getProperExamples__(self, formed_examples) :
         Proper_Examples = []
@@ -136,7 +155,8 @@ class NewsDataset(Dataset):
 
             indexed_article = self.doc_zero_padding(indexed_article, 'article', 'back', tensor=False)
             if tensor is True:
-                indexed_article = torch.tensor(indexed_article, requires_grad=True, device=self.device)
+                # indexed_article = torch.tensor(indexed_article, requires_grad=True, device=self.device)
+                indexed_article = torch.tensor(indexed_article, requires_grad=False, device=self.device)
 
 
             # tensor abstract
@@ -154,7 +174,8 @@ class NewsDataset(Dataset):
 
             indexed_abstract = self.doc_zero_padding(indexed_abstract, 'abstract', 'front')
             if tensor is True :
-                indexed_abstract = torch.tensor(indexed_abstract, requires_grad=True, device=self.device)
+                # indexed_abstract = torch.tensor(indexed_abstract, requires_grad=False, device=self.device)
+                indexed_abstract = torch.tensor(indexed_abstract, requires_grad=False, device=self.device)
 
             # tensor label (1/0)
             indexed_label = torch.tensor(label, requires_grad=False, device=self.device) if tensor is True else label # requires_grad is not necessary for labels
@@ -218,6 +239,23 @@ class NewsDataset(Dataset):
 
         return length
 
-    def loader(self, data) :
-        batch_size = Args.args.batch_size
-        return DataLoader(data, batch_size, shuffle=False, num_workers=32)
+    def setIdxes(self):
+        total = len(self.indexed_examples)
+        train = int(total * (self.portion['train'] / 100))
+        validation = int(total * (self.portion['validation'] / 100))
+        test = total - (train + validation)
+
+        # set start indexes of train, validation, test
+        self.startIdx['validation'] = train
+        self.startIdx['test'] = train + validation
+
+        # set the number of each examples set ( proportion -> actual count )
+        self.portion['train'] = train
+        self.portion['validation'] = validation
+        self.portion['test'] = test
+
+    def get_trainloader(self, set, batch_size) :
+        self.set = set # train/validation/test
+        trainloader = torch.utils.data.DataLoader(Dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+
+        return trainloader
