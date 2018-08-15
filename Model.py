@@ -53,11 +53,11 @@ class CnnEnc(nn.Module) :
         maxed_conv3 = F.max_pool2d(F.relu(self.conv3(x)), (self.max_sent-4, 1) )
 
         # If the size is square you can only specify a single number
-        maxed_conv1 = maxed_conv1.view(-1, self.num_flat_features(maxed_conv1))
-        maxed_conv2 = maxed_conv2.view(-1, self.num_flat_features(maxed_conv2))
-        maxed_conv3 = maxed_conv3.view(-1, self.num_flat_features(maxed_conv3))
+        maxed_conv1 = maxed_conv1.view(-1, 1, self.num_flat_features(maxed_conv1))
+        maxed_conv2 = maxed_conv2.view(-1, 1, self.num_flat_features(maxed_conv2))
+        maxed_conv3 = maxed_conv3.view(-1, 1, self.num_flat_features(maxed_conv3))
 
-        x = torch.cat((maxed_conv1, maxed_conv2, maxed_conv3), 1) # becomes : batch_size x 300
+        x = torch.cat((maxed_conv1, maxed_conv2, maxed_conv3), 2) # becomes : batch_size x 300
         # Fully connected layer with dropout and softmax output
         x = self.drp(x)
         x = self.Tanh(self.fc(x))
@@ -96,14 +96,15 @@ class DocEnc(nn.Module) :
 
 
     def forward(self, inputs) :
-        sent_hiddens = []
+        sent_hiddens = torch.tensor([], device=Args.args.device)
         self.batch_size = len(inputs)
         # inputs = sorted(inputs, reverse=True)
 
         for i in range(self.sent_num) :
             cur_sents_batch = getMidElems(inputs, i) # batch_size x 1 x max_sent
-            sent_hiddens.append(self.sentEncoder(cur_sents_batch))
-        sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size).to(torch.device(Args.args.device)) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+            sent_hiddens = torch.cat((sent_hiddens, self.sentEncoder(cur_sents_batch)), 0)
+            # sent_hiddens.append(self.sentEncoder(cur_sents_batch))
+        # sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size).to(torch.device(Args.args.device)) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
         # rnn.pack_padded_sequence(sent_hiddens)
 
 
