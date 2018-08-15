@@ -102,12 +102,11 @@ class DocEnc(nn.Module) :
 
         for i in range(self.sent_num) :
             cur_sents_batch = getMidElems(inputs, i) # batch_size x 1 x max_sent
-            sent_hiddens = torch.cat((sent_hiddens, self.sentEncoder(cur_sents_batch)), 0)
-            # sent_hiddens.append(self.sentEncoder(cur_sents_batch))
-        # sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size).to(torch.device(Args.args.device)) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+            sent_encoded = self.sentEncoder(cur_sents_batch)
+            sent_hiddens = torch.cat((sent_hiddens, sent_encoded), 1)
         # rnn.pack_padded_sequence(sent_hiddens)
 
-
+        # RNN for all the sentences in the article
         sent_hiddens, _ = self.DocEncoder(sent_hiddens) # encoder_out : [b x sent_num x hid*2]
         doc_hidden = sent_hiddens.transpose(0,1)[-1][:] # tranpose operation necessary for accessing problem in python
 
@@ -153,12 +152,14 @@ class ScoringNetwork(nn.Module) :
         attn_sent_hiddens, doc_hiddens = self.DocEncoder(articles)
 
         # get abstract hidden states
-        abs_hiddens = []
+        abs_hiddens = torch.tensor([], device=Args.args.device)
 
         for i in range(self.abs_num) :
             cur_sents_batch = getMidElems(abstracts, i) # for batch : batch_size x 1 x max_sent
-            abs_hiddens.append(self.CnnEnc(cur_sents_batch))  # TODO) must consider notion of mini_batch
-        abs_hiddens = torch.stack(abs_hiddens).view(-1, len(abs_hiddens), self.hidden_size * 2)  # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+            sent_encoded = self.CnnEnc(cur_sents_batch)
+            abs_hiddens = torch.cat((abs_hiddens, sent_encoded), 1) # batch_size * sent_num * hidden_size
+
+        # RNN for all sentences in abstract
         abs_encodeds, _ = self.AbsRNN(abs_hiddens) # RNN for the abstracts
 
         # get scores
