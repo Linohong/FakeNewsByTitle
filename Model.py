@@ -19,14 +19,14 @@ class CnnEnc(nn.Module) :
     '''
         CNN Encoder
     '''
-    def __init__(self, Vocab) :
+    def __init__(self, Vocab, hidden_size) :
         super(CnnEnc, self).__init__()
         # embedding layer
         self.embeddings = nn.Embedding(Args.args.vocab_size + 4, Args.args.embed_dim)
         self.feat_size = Args.args.feat_size
         self.embed_dim = Args.args.embed_dim
         self.max_sent = Args.args.max_sent
-        self.hidden_size = Args.args.hidden_size
+        self.hidden_size = hidden_size
 
         if Args.args.predefined == True :
             wordEmbedding = DP.load_predefined_embedding(Args.args.embed_path, Vocab)
@@ -85,10 +85,10 @@ class DocEnc(nn.Module) :
         self.sent_num = Args.args.sent_num
         self.hidden_size = Args.args.hidden_size
         self.embed_dim = Args.args.embed_dim
-        self.attnHidden = torch.empty(self.batch_size, self.hidden_size*2,  1) # hidden_size * 2 for bidirectional.
+        self.attnHidden = torch.empty(1, self.hidden_size*2,  1, device=Args.args.device) # hidden_size * 2 for bidirectional.   1 to be expanded to the batch_size
         nn.init.normal_(self.attnHidden) # declare a hidden vector for scoring using attention mechanism with normal distribution initialization
 
-        self.sentEncoder = CnnEnc(Vocab)
+        self.sentEncoder = CnnEnc(Vocab, self.hidden_size) # Cnn Encoder for article sentences
         self.DocEncoder = nn.LSTM(input_size=self.embed_dim,
                                   hidden_size=self.hidden_size,
                                   batch_first=True,
@@ -97,11 +97,13 @@ class DocEnc(nn.Module) :
 
     def forward(self, inputs) :
         sent_hiddens = []
+        self.batch_size = len(inputs)
         # inputs = sorted(inputs, reverse=True)
 
         for i in range(self.sent_num) :
-            sent_hiddens.append(self.sentEncoder(inputs[:][i])) # (TODO) must consider notion of mini_batch
-        sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+            cur_sents_batch = getMidElems(inputs, i) # batch_size x 1 x max_sent
+            sent_hiddens.append(self.sentEncoder(cur_sents_batch))
+        sent_hiddens = torch.stack(sent_hiddens).view(-1, len(sent_hiddens), self.hidden_size).to(torch.device(Args.args.device)) # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
         # rnn.pack_padded_sequence(sent_hiddens)
 
 
@@ -109,11 +111,12 @@ class DocEnc(nn.Module) :
         doc_hidden = sent_hiddens.transpose(0,1)[-1][:] # tranpose operation necessary for accessing problem in python
 
         # attention mechanism
-        scores = torch.bmm(sent_hiddens, self.attnHidden)
+        scores = torch.bmm(sent_hiddens, self.attnHidden.expand(self.batch_size, self.hidden_size * 2, 1))
         attn = F.softmax(scores, dim=1) # probability distribution
         attn_sent_hiddens = torch.mul(attn.expand_as(sent_hiddens), sent_hiddens)
 
         return attn_sent_hiddens, doc_hidden # (TODO) consider if return the last or whole outputs
+
 
 
 
@@ -123,19 +126,57 @@ class ScoringNetwork(nn.Module) :
     '''
     def __init__(self, Vocab) :
         super(ScoringNetwork, self).__init__()
+        self.batch_size = Args.args.batch_size
+        self.hidden_size = Args.args.hidden_size
+        self.abs_num = Args.args.abs_num
         self.sent_num = Args.args.sent_num
-        self.CnnEnc = CnnEnc(Vocab)
+        self.score = Args.args.score
+
+        self.CnnEnc = CnnEnc(Vocab, self.hidden_size * 2) # CnnEncoder for abstract sentences
         self.DocEncoder = DocEnc(Vocab)
+        self.AbsRNN = nn.LSTM(input_size=self.hidden_size * 2,
+                                hidden_size=self.hidden_size * 2,
+                                batch_first=True,
+                                bidirectional=False)
 
     def forward(self, articles, abstracts, labels) :
+        '''
+            :param articles: batch_size x sent_num x max_sent 
+            :param abstracts: batch_size x abs_num x max_sent
+            :param labels: batch_size x 1 
+            :return: 
+        '''
+
+        # get sentence hidden states
+        self.batch_size = len(articles)
         attn_sent_hiddens, doc_hiddens = self.DocEncoder(articles)
+
+        # get abstract hidden states
         abs_hiddens = []
-        for abs in abstracts :
-            abs_hiddens.append(self.CnnEnc(abs))  # TODO) must consider notion of mini_batch
-        abs_hiddens = torch.stack(abs_hiddens).view(-1, len(abs_hiddens), self.hidden_size)  # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
 
-        scores_s = torch.bmm(abs_hiddens.expand_as(attn_sent_hiddens), attn_sent_hiddens)
-        scores_d = torch.bmm(abs_hiddens,  doc_hiddens)
+        for i in range(self.abs_num) :
+            cur_sents_batch = getMidElems(abstracts, i) # for batch : batch_size x 1 x max_sent
+            abs_hiddens.append(self.CnnEnc(cur_sents_batch))  # TODO) must consider notion of mini_batch
+        abs_hiddens = torch.stack(abs_hiddens).view(-1, len(abs_hiddens), self.hidden_size * 2)  # reshape the sent_hiddens as a tensor - list of tensors    batch_size * sent_num * hidden_size
+        abs_encodeds, _ = self.AbsRNN(abs_hiddens) # RNN for the abstracts
 
-        return scores_s + scores_d
+        # get scores
+        abs_encoded = getMidElems(abs_encodeds, -1)
+        abs_encoded = abs_encoded.view(-1, 1, self.hidden_size * 2)
+        scores_s = torch.bmm(attn_sent_hiddens, abs_encoded.transpose(1,2))
+        ones = torch.ones(self.batch_size, 1, self.sent_num, device=Args.args.device) # notice the device attribute exists
+        scores_s = F.sigmoid(torch.bmm(ones, scores_s).view(-1, 1))
+        # scores_d = F.sigmoid(torch.bmm(abs_encoded,  doc_hiddens.view(-1, self.hidden_size*2, 1)).view(-1, 1))
 
+        # pos = F.sigmoid(scores_s + scores_d)
+        pos = scores_s
+        neg = 1 - pos # also tensor with same 'requires_grad', 'device' as a neg.
+        SCORE = torch.cat((pos, neg), dim=1)
+
+        return SCORE
+
+def getMidElems(inputs, index) :
+    batch = [sample[index] for sample in inputs]
+    batch = torch.stack(batch)
+
+    return batch

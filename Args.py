@@ -5,6 +5,7 @@ parser = argparse.ArgumentParser(description='FakeNewsByTitle Argument Parser')
 # option
 parser.add_argument('-device', type=str, default='cpu', help='cpu/cuda')
 parser.add_argument('-predefined', type=bool, default=False, help='enable/disable predefined word embedding')
+parser.add_argument('-score', type=float, help='score threshold')
 
 
 # model
@@ -22,9 +23,9 @@ parser.add_argument('-dec_unit', type=str, default='syll')
 
 
 # learning
-parser.add_argument('-epoch', type=int, default=10)
+parser.add_argument('-epoch', type=int, default=1000)
 parser.add_argument('-batch_size', type=int, default=1, help='batch size for training [default: 1]')
-parser.add_argument('-learning_rate', type=float, default=0.02, help='learning rate')
+parser.add_argument('-learning_rate', type=float, default=0.00001, help='learning rate')
 parser.add_argument('-kfold', type=int, default=10, help='k-folding size')
 parser.add_argument('-early', type=int, default=None)
 parser.add_argument('-optim', type=str, default='SGD')

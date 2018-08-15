@@ -71,18 +71,19 @@ def example_generator(data_path, max):
             if ( count == max ) :
                 break
             else :
-                reader = open(f, 'rb')
-                while True:
-                    len_bytes = reader.read(8)
-                    if not len_bytes: break
-                    str_len = struct.unpack('q', len_bytes)[0]
-                    example_str = struct.unpack('%ds' % str_len, reader.read(str_len))[0]
+                with open(f, 'rb') as reader :
+                    while True:
+                        len_bytes = reader.read(8)
+                        if not len_bytes: break
+                        str_len = struct.unpack('q', len_bytes)[0]
+                        example_str = struct.unpack('%ds' % str_len, reader.read(str_len))[0]
 
-                    count+=1
-                    if (count == max) :
-                        break
+                        count+=1
+                        if (count == max) :
+                            break
 
-                    yield example_pb2.Example.FromString(example_str)
+                        yield example_pb2.Example.FromString(example_str)
+
 
 
 def text_generator(example_generator):
@@ -119,7 +120,7 @@ def form_examples(data_path, max=None):
             abstract.decode("utf-8"))]  # abstract is byte type in python3, so convert it to a string type
                                         # Use the <s> and </s> tags in abstract to get a list of sentences.
         article_list = sent_tokenize(article.decode("utf-8"))
-        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':1})
+        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':[1., 0.]}) # label : [pos, neg] - 1 hot style
 
     # Labelize Examples
     Examples = labelize_examples(Examples)
@@ -143,7 +144,7 @@ def labelize_examples(formed_examples, fake_num=None) :
         formed_examples[i]['abstract'], formed_examples[fake_num-i-1]['abstract'] = \
             formed_examples[fake_num-i-1]['abstract'], formed_examples[i]['abstract'] # swap their abstract
 
-        formed_examples[i]['label'] = formed_examples[fake_num-i-1]['label'] = 0
+        formed_examples[i]['label'] = formed_examples[fake_num-i-1]['label'] = [0., 1.]
 
     return formed_examples
 

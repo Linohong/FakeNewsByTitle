@@ -26,11 +26,10 @@ class NewsDataset(Dataset):
         self.device = torch.device(Args.args.device)
         self.formed_examples = self.__getProperExamples__(formed_examples) # list of dictionaries of article, abstract pair
         self.Vocab = Vocab
-        self.indexed_examples = self.index_examples(self.formed_examples, tensor=False)
-        # self.tensored_examples = self.tensor_examples(self.formed_examples) # examples that are tensored
+        self.indexed_examples = self.index_examples(self.formed_examples, tensor=True)
 
     def __len__(self):
-        return len(self.formed_examples)
+        return len(self.indexed_examples)
 
     def __getitem__(self, doc_idx):
         ''' 
@@ -39,30 +38,10 @@ class NewsDataset(Dataset):
         '''
         # example = self.tensored_examples[doc_idx]
         example = self.indexed_examples[doc_idx]
+        # example['article'] = example['article'][:2]
+
         return example
 
-
-    def __get_TrainLoader__(self) :
-        '''
-            :return: TrainLoader with data that are properly selected according to the hyper-parameters
-        '''
-        # train_article = []
-        # train_abstract = []
-        # train_output = []
-        #
-        # for i in range(self.__len__()) :
-        #     example = self.__getitem__(i)
-        #     if example is None : continue
-        #     else :
-        #         train_article.append(example['article'])
-        #         train_abstract.append(example['abstract'])
-        #         train_output.append(example['label']) # 1 or 0
-
-        # train_data = torch.utils.data.TensorDataset(train_input, train_output)
-        # train_data = torch.utils.data.TensorDataset(train_article, train_abstract, train_output)
-        # trainloader = DataLoader(train_data, batch_size=self.batch_size, shuffle=False, num_workers=32)
-        #
-        # return trainloader
 
     def __getProperExamples__(self, formed_examples) :
         Proper_Examples = []
@@ -155,7 +134,7 @@ class NewsDataset(Dataset):
                 result = self.sent_zero_padding(result, Args.args.max_sent)
                 indexed_article.append(result)
 
-            indexed_article = self.doc_zero_padding(indexed_article, 'article', 'front', tensor=False)
+            indexed_article = self.doc_zero_padding(indexed_article, 'article', 'back', tensor=False)
             if tensor is True:
                 indexed_article = torch.tensor(indexed_article, requires_grad=True, device=self.device)
 
@@ -178,7 +157,7 @@ class NewsDataset(Dataset):
                 indexed_abstract = torch.tensor(indexed_abstract, requires_grad=True, device=self.device)
 
             # tensor label (1/0)
-            indexed_label = torch.tensor([label], requires_grad=True, device=self.device) if tensor is True else [label]
+            indexed_label = torch.tensor(label, requires_grad=False, device=self.device) if tensor is True else label # requires_grad is not necessary for labels
 
             indexed_examples.append({'article':indexed_article, 'abstract':indexed_abstract, 'label':indexed_label})
 

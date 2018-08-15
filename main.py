@@ -3,37 +3,59 @@ import DataProcess.DataSets as DS
 import Args
 import Model
 import torch
+import Train
+import Evaluation
+import etc.TimeElapsed as TE
+stime = [None] # elements of list in python which is passed to a function as a parameter can be modified within the function.
 
 
 # Create Vocab
+print("Reading Vocabulary .... ", end='')
 Vocab = DP.Vocab(Args.args.voca_path, Args.args.vocab_size)
+print("Done !!!")
 
 
 
 # Call DataSet
 print("Obtaining Dataset .... ", end='')
+TE.timeCheck('s', stime)
 data_examples_gen = DP.form_examples(Args.args.data_path, Args.args.train_size) # generator of article, abstract pair
 DataManager = DS.NewsDataset(data_examples_gen, Vocab) # dataset defined
-print("Done !!!")
+del data_examples_gen
+trainloader = torch.utils.data.DataLoader(DataManager, batch_size=Args.args.batch_size, shuffle=True, num_workers=0)
+print("Done !!!", end='     ')
+TE.timeCheck('e', stime)
+
 
 
 # Define Model
+print("Calling Model .... ", end = '')
+TE.timeCheck('s', stime)
 SCORENET = Model.ScoringNetwork(Vocab)
-trainloader = torch.utils.data.DataLoader(DataManager, batch_size=Args.args.batch_size, shuffle=True, num_workers=32)
-
-for mini_batch in trainloader :
-    print(mini_batch['article'])
-    #print(mini_batch['abstract'][0].shape)
-    #print(mini_batch['label'][0].shape)
-    # output = SCORENET(batch_articles, batch_abstracts, batch_labels)
+SCORENET = SCORENET.cuda() if Args.args.device == 'cuda' else SCORENET
+print("Done !!!", end = '    ')
+TE.timeCheck('e', stime)
 
 
+# Training Model
+print("Training Model .... ")
+TE.timeCheck('s', stime)
+Train.Train(trainloader, SCORENET)
+print("Done Training !!!", end= '    ')
+TE.timeCheck('e', stime)
 
-# train_data = torch.utils.data.TensorDataset(train, label)
-# trainloader = torch.utils.data.DataLoader(train_data, batch_size=Args.args.batch_size, shuffle=False, num_workers=32)
-#
-# for batch_article, batch_abstract in trainloader :
-#     # output = sentRNN(sample['article'])
-#     output = sentRNN(batch_article)
 
-# Train
+
+# Save Model
+print("Saving Model .... ", end='')
+torch.save(SCORENET, './' + Args.args.model_name)
+print("Done !!!")
+
+
+# Evaluation
+print("Evaluating .... ")
+TE.timeCheck('s', stime)
+Evaluation.Evaluation(trainloader, SCORENET)
+print("Done Training !!!", end= '    ')
+TE.timeCheck('e', stime)
+
