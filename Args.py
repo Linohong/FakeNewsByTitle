@@ -15,7 +15,6 @@ parser.add_argument('-sent_num', type=int, default=64, help='max number of sente
 parser.add_argument('-abs_num', type=int, default=2, help='max number of abstract sentences')
 parser.add_argument('-dropout', type=float, default=0.5)
 parser.add_argument('-embed_dim', type=int, default=300)
-parser.add_argument('-feat_size', type=int, default=100)
 parser.add_argument('-model', type=str, default='vanilla')
 parser.add_argument('-model_name', type=str, default='NONE')
 parser.add_argument('-enc_unit', type=str, default='syll')
@@ -28,7 +27,7 @@ parser.add_argument('-batch_size', type=int, default=1, help='batch size for tra
 parser.add_argument('-learning_rate', type=float, default=0.00001, help='learning rate')
 parser.add_argument('-kfold', type=int, default=10, help='k-folding size')
 parser.add_argument('-early', type=int, default=None)
-parser.add_argument('-optim', type=str, default='SGD')
+parser.add_argument('-optim', type=str, default='Adam')
 parser.add_argument('-exam_unit', type=str, default='word')
 
 # Data

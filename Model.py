@@ -23,7 +23,7 @@ class CnnEnc(nn.Module) :
         super(CnnEnc, self).__init__()
         # embedding layer
         self.embeddings = nn.Embedding(Args.args.vocab_size + 4, Args.args.embed_dim)
-        self.feat_size = Args.args.feat_size
+        self.feat_size = int((Args.args.hidden_size)/3)
         self.embed_dim = Args.args.embed_dim
         self.max_sent = Args.args.max_sent
         self.hidden_size = hidden_size
@@ -110,12 +110,15 @@ class DocEnc(nn.Module) :
         sent_hiddens, _ = self.DocEncoder(sent_hiddens) # encoder_out : [b x sent_num x hid*2]
         doc_hidden = sent_hiddens.transpose(0,1)[-1][:] # tranpose operation necessary for accessing problem in python
 
+        '''
         # attention mechanism
         scores = torch.bmm(sent_hiddens, self.attnHidden.expand(self.batch_size, self.hidden_size * 2, 1))
         attn = F.softmax(scores, dim=1) # probability distribution
         attn_sent_hiddens = torch.mul(attn.expand_as(sent_hiddens), sent_hiddens)
 
         return attn_sent_hiddens, doc_hidden # (TODO) consider if return the last or whole outputs
+        '''
+        return sent_hiddens, doc_hidden
 
 
 
@@ -176,6 +179,60 @@ class ScoringNetwork(nn.Module) :
         SCORE = torch.cat((pos, neg), dim=1)
 
         return SCORE
+
+
+class BiLinearNetwork(nn.Module) :
+    '''
+        Bilinear Network : final classfication decision made from feed forward network
+    '''
+
+    def __init__(self, Vocab):
+        super(BiLinearNetwork, self).__init__()
+        self.batch_size = Args.args.batch_size
+        self.hidden_size = Args.args.hidden_size
+        self.abs_num = Args.args.abs_num
+        self.sent_num = Args.args.sent_num
+        self.score = Args.args.score
+
+        self.CnnEnc = CnnEnc(Vocab, self.hidden_size * 2)  # CnnEncoder for abstract sentences
+        self.DocEncoder = DocEnc(Vocab)
+        self.AbsRNN = nn.LSTM(input_size=self.hidden_size * 2,
+                              hidden_size=self.hidden_size * 2,
+                              batch_first=True,
+                              bidirectional=False)
+        self.drp = nn.Dropout(p=0.2)
+        self.biLinear = nn.Linear(self.hidden_size * 8, 2) # 2 = number of the labels
+
+    def forward(self, articles, abstracts, labels):
+        '''
+            :param articles: batch_size x sent_num x max_sent
+            :param abstracts: batch_size x abs_num x max_sent
+            :param labels: batch_size x 1
+            :return:
+        '''
+
+        # get sentence hidden states without attention
+        self.batch_size = len(articles)
+        sent_hiddens, doc_hiddens = self.DocEncoder(articles)
+
+        # get abstract hidden states
+        abs_hiddens = torch.tensor([], device=Args.args.device)
+        for i in range(self.abs_num):
+            cur_sents_batch = getMidElems(abstracts, i)  # for batch : batch_size x 1 x max_sent
+            sent_encoded = self.CnnEnc(cur_sents_batch)
+            abs_hiddens = torch.cat((abs_hiddens, sent_encoded), 1)  # batch_size * sent_num * hidden_size
+        abs_encodeds, _ = self.AbsRNN(abs_hiddens)  # RNN for the abstracts
+
+        # Bilinear classification
+        concat_art = torch.cat((getMidElems(sent_hiddens, 0), getMidElems(sent_hiddens, -1)), 1) # hidden_size * 4
+        concat_abs = torch.cat((getMidElems(abs_encodeds,0), getMidElems(abs_encodeds, -1)), 1) # hidden_size * 4
+        concat = torch.cat( (concat_art, concat_abs), 1 ) # hidden_size * 8
+        concat = self.drp(concat)
+        concat = self.biLinear(concat)
+        prob = F.softmax(concat, 1)
+
+        return prob
+
 
 def getMidElems(inputs, index) :
     batch = [sample[index] for sample in inputs]

@@ -115,14 +115,15 @@ def form_examples(data_path, max=None):
     input_gen = text_generator(example_generator(data_path, max))
     Examples = []
 
-    for (article, abstract) in input_gen:  # read the next example from file. article and abstract are both strings.
+    for id, (article, abstract) in enumerate(input_gen):  # read the next example from file. article and abstract are both strings.
         abstract_list = [sent.strip() for sent in abstract2sents(
             abstract.decode("utf-8"))]  # abstract is byte type in python3, so convert it to a string type
                                         # Use the <s> and </s> tags in abstract to get a list of sentences.
         article_list = sent_tokenize(article.decode("utf-8"))
-        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':[1., 0.]}) # label : [pos, neg] - 1 hot style
+        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':[1., 0.], 'id':id}) # label : [pos, neg] - 1 hot style
 
     # Labelize Examples
+    # Examples = labelize_examples(Examples)
     Examples = labelize_examples(Examples)
 
     return Examples
@@ -133,20 +134,32 @@ def form_examples(data_path, max=None):
 def labelize_examples(formed_examples, fake_num=None) :
     '''
         :param formed_examples: examples list with article and abstract pair 
-        :param fake_num: the number of fake news to be made 
+        :param fake_num: the number of fake news to be made ( must be even number )
         :return: labelized examples
     '''
     if fake_num == None :
         fake_num = int(len(formed_examples) / 2)
         fake_num = fake_num-1 if fake_num % 2 is not 0 else fake_num
 
-    for i in range(fake_num) :
-        formed_examples[i]['abstract'], formed_examples[fake_num-i-1]['abstract'] = \
-            formed_examples[fake_num-i-1]['abstract'], formed_examples[i]['abstract'] # swap their abstract
 
-        formed_examples[i]['label'] = formed_examples[fake_num-i-1]['label'] = [0., 1.]
+    labelized_examples = [entry for entry in formed_examples]
+    for i in range( int(fake_num/2) ) : # fake number must be even.
+        labelized_examples[i]['abstract'], labelized_examples[fake_num-i-1]['abstract'] = \
+            formed_examples[fake_num - i - 1]['abstract'], formed_examples[i]['abstract']  # swap their abstract
 
-    return formed_examples
+        labelized_examples[i]['label'] = labelized_examples[fake_num-i-1]['label'] = [0., 1.] # put label
+
+        labelized_examples[i]['article'], labelized_examples[fake_num-i-1]['article'] = \
+            formed_examples[i]['article'], formed_examples[fake_num - i - 1]['article']  # copy article
+
+        labelized_examples[i]['id'], labelized_examples[fake_num - i - 1]['id'] = \
+            formed_examples[i]['id'], formed_examples[fake_num - i - 1]['id']  # copy id
+
+    for i in range(fake_num, len(formed_examples)) :
+        labelized_examples[i] = formed_examples[i]
+
+    del formed_examples
+    return labelized_examples
 
 
 

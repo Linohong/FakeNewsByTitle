@@ -1,5 +1,5 @@
 '''
-    Following codes are written so that 
+    Following codes are written so that
     train examples can be dealt most easily.
 
     (TODO) Redefine DataSet class to cutomize.
@@ -9,6 +9,7 @@
 '''
 import Args
 import torch
+from random import shuffle
 import DataProcess.DataProcess as DP
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
@@ -17,52 +18,65 @@ from torch.utils.data import Dataset, DataLoader
 class NewsDataset(Dataset):
     """CNN/Daily Mail Dataset"""
 
-    def __init__(self, formed_examples, Vocab):
+    def __init__(self, formed_examples, Vocab, reuse):
         """
         Args:
             data_path (string): Directory with all the News Data with binary form.
             formed_examples (generator) : generator of tuples with form : (article_list, abstract_list)
         """
-        self.set = 'train' # train/validation/test
-        self.portion ={'train':80, 'validation':10, 'test':10} #train/validation/test
-        self.startIdx = {'train':0, 'validation':0, 'test':0}
-        self.device = torch.device(Args.args.device)
-        self.formed_examples = self.__getProperExamples__(formed_examples) # list of dictionaries of article, abstract pair
-        self.Vocab = Vocab
-        self.indexed_examples = self.index_examples(self.formed_examples, tensor=True)
-        self.setIdxes()
+
+        if reuse is False :
+            self.set = 'train' # train/validation/test
+            self.portion ={'train':80, 'validation':0, 'test':20} #train/validation/test
+            self.startIdx = {'train':0, 'validation':0, 'test':0}
+            self.device = torch.device(Args.args.device)
+            self.Vocab = Vocab
+            self.formed_examples = self.__getProperExamples__(formed_examples, if_shuffle=True) # list of dictionaries of article, abstract pair
+            self.setIdxes()  # sets the start indexes of each sets
+            self.indexed_examples = self.__index_examples__(self.formed_examples, tensor=True)
+
+            # self.indexed_examples = self.__make_dictionary__(self.indexed_examples) # dictionary version 'train', 'validation', 'test'
+
+        elif reuse is True :
+            self.set = 'test'
+            self.device = torch.device(Args.args.device)
+            self.Vocab = Vocab
+            self.indexed_examples = {}
+            self.indexed_examples[self.set] = formed_examples # formed_examples should be indexed examples
+
 
     def __len__(self):
-
-        if self.set is 'train' :
-            return self.portion['train']
-
-        elif self.set is 'validatoin' :
-            return self.portion['validation']
-
-        elif self.set is 'test' :
-            return self.portion['test']
-        # return len(self.indexed_examples)
+        return len(self.indexed_examples[self.set])
 
     def __getitem__(self, doc_idx):
-        ''' 
-            - Highly recommended to use this function to  
+        '''
+            - Highly recommended to use this function to
             search out those of which don't meet the constraints
         '''
-        # example = self.indexed_examples[doc_idx]
-        if self.set is 'train' :
-            prev = 0
-
-        elif self.set is 'validation' :
-            prev = self.portion['train']
-
-        elif self.set is 'test' :
-            prev = self.portion['train'] + self.portion['validation']
-
-        example = self.indexed_examples[prev + doc_idx]
+        example = self.indexed_examples[self.set][doc_idx]
         return example
 
-    def __getProperExamples__(self, formed_examples) :
+    def __make_dictionary__(self, indexed_examples) :
+        Examples = {'train':[], 'validation':[], 'test':[]}
+        length = len(indexed_examples)
+        for i in range(0, self.startIdx['validation']) :
+            Examples['train'].append(indexed_examples[i])
+            indexed_examples[i] = None
+        for i in range(self.startIdx['validation'], self.startIdx['test']) :
+            Examples['validation'].append(indexed_examples[i])
+            indexed_examples[i] = None
+        for i in range(self.startIdx['test'], length) :
+            Examples['test'].append(indexed_examples[i])
+            indexed_examples[i] = None
+        # Examples['train'] = indexed_examples[:self.startIdx['validation']]
+        # Examples['validation'] = indexed_examples[self.startIdx['validation']:self.startIdx['test']]
+        # Examples['test'] = indexed_examples[self.startIdx['test']:]
+
+        indexed_examples = None
+        del indexed_examples
+        return Examples
+
+    def __getProperExamples__(self, formed_examples, if_shuffle=True) :
         Proper_Examples = []
         for example in formed_examples :
             if self.__is_proper_doc__(example, 'article') is not True :
@@ -76,12 +90,15 @@ class NewsDataset(Dataset):
 
             Proper_Examples.append(example)
 
+        if if_shuffle is True :
+            shuffle(Proper_Examples)
+
         return Proper_Examples
 
     def __is_proper_doc__(self, tensored_example, type) :
         '''
-            :param tensored_example: 
-            :return: 
+            :param tensored_example:
+            :return:
         '''
         if type == 'article' :
             max = Args.args.sent_num
@@ -93,9 +110,9 @@ class NewsDataset(Dataset):
 
     def __is_proper_sents__(self, tensored_examples) :
         '''
-            :param tensored_example: 
-            :param type: 
-            :return: 
+            :param tensored_example:
+            :param type:
+            :return:
         '''
         max = Args.args.max_sent
         for sent in tensored_examples :
@@ -106,7 +123,7 @@ class NewsDataset(Dataset):
 
     def __proper_art_sents__(self, tensored_example, max_len) :
         '''
-            :param formed_example: formed pair of article and abstract 
+            :param formed_example: formed pair of article and abstract
             :param max_len
             :return: Unexceeding max_len of article sentences
         '''
@@ -120,7 +137,7 @@ class NewsDataset(Dataset):
 
     def __proper_abs_sents__(self, tensored_example, max_len):
         '''
-              :param formed_example: formed pair of article and abstract 
+              :param formed_example: formed pair of article and abstract
               :param max_len
               :return: Unexceeding max_len of abstract sentences
           '''
@@ -132,17 +149,29 @@ class NewsDataset(Dataset):
 
         return proper_abs_sents
 
+    def which(self, ind) :
+        '''
+            :param ind: current index of examples
+            :return: return the name of the data set of which the 'ind' is a part.
+        '''
+        if ind >= self.startIdx['train'] and ind < self.startIdx['validation'] :
+            return 'train'
+        elif ind >= self.startIdx['validation'] and ind < self.startIdx['test'] :
+            return 'validation'
+        else :
+            return 'test'
 
-    def index_examples(self, Examples, tensor=False) :
-        indexed_examples = []
-        for example in Examples :
+    def __index_examples__(self, Examples, tensor=False) :
+        indexed_examples = {'train':[], 'validatoin':[], 'test':[]}
+        for i, example in enumerate(Examples):
             article_list = example['article']
             abstract_list = example['abstract']
-            label = example['label'] # TODO) label must be added
+            label = example['label']  # TODO) label must be added
+            id = example['id']
 
             # tensor article
             indexed_article = []
-            for sent in article_list :
+            for sent in article_list:
                 cur_sent = sent.split()
                 result = []
                 for word in cur_sent:
@@ -158,35 +187,36 @@ class NewsDataset(Dataset):
                 # indexed_article = torch.tensor(indexed_article, requires_grad=True, device=self.device)
                 indexed_article = torch.tensor(indexed_article, requires_grad=False, device=self.device)
 
-
             # tensor abstract
             indexed_abstract = []
-            for sent in abstract_list :
+            for sent in abstract_list:
                 cur_sent = sent.split()
                 result = []
-                for word in cur_sent :
-                    try :
+                for word in cur_sent:
+                    try:
                         result.append(self.Vocab._word_to_id[word])
-                    except KeyError :
+                    except KeyError:
                         result.append(self.Vocab._word_to_id[DP.UNKNOWN_TOKEN])
                 result = self.sent_zero_padding(result, Args.args.max_sent)
                 indexed_abstract.append(result)
 
             indexed_abstract = self.doc_zero_padding(indexed_abstract, 'abstract', 'front')
-            if tensor is True :
+            if tensor is True:
                 # indexed_abstract = torch.tensor(indexed_abstract, requires_grad=False, device=self.device)
                 indexed_abstract = torch.tensor(indexed_abstract, requires_grad=False, device=self.device)
 
             # tensor label (1/0)
-            indexed_label = torch.tensor(label, requires_grad=False, device=self.device) if tensor is True else label # requires_grad is not necessary for labels
+            indexed_label = torch.tensor(label, requires_grad=False, device=self.device) if tensor is True else label  # requires_grad is not necessary for labels
 
-            indexed_examples.append({'article':indexed_article, 'abstract':indexed_abstract, 'label':indexed_label})
+            # put into the result var.
+            indexed_examples[self.which(i)].append({'article': indexed_article, 'abstract': indexed_abstract, 'label': indexed_label, 'id': id})
 
         return indexed_examples
 
+
     def sent_zero_padding(self, input, max_len) :
         '''
-            :param sent: subject to be padded with zeros  
+            :param sent: subject to be padded with zeros
             :return: padded SENTENCE of input
         '''
         result = input
@@ -202,7 +232,7 @@ class NewsDataset(Dataset):
             :param sent_hiddens : subject to be padded.
             :param type : article/ abstract
             :param position : position of the padding. front / back
-            :param tensor : tensor or just index 
+            :param tensor : tensor or just index
             :return: padded document of sentences
         '''
         sent_num = Args.args.sent_num if type is 'article' else Args.args.abs_num
@@ -223,15 +253,15 @@ class NewsDataset(Dataset):
 
     def sortBatch(self, inputs) :
         '''
-            :param input: 
-            :return: return descending order of batch  
+            :param input:
+            :return: return descending order of batch
         '''
         return sorted(inputs, reverse=True)
 
     def getBatch_length(self, inputs) :
         '''
-            :param inputs: descending order of batches 
-            :return: list of the number of sentences of each batch 
+            :param inputs: descending order of batches
+            :return: list of the number of sentences of each batch
         '''
         length = []
         for batch in inputs :
@@ -240,22 +270,43 @@ class NewsDataset(Dataset):
         return length
 
     def setIdxes(self):
-        total = len(self.indexed_examples)
-        train = int(total * (self.portion['train'] / 100))
-        validation = int(total * (self.portion['validation'] / 100))
-        test = total - (train + validation)
+        # total = len(self.indexed_examples)
+        # num_train = int(total * (self.portion['train'] / 100))
+        # num_val = int(total * (self.portion['validation'] / 100))
+        # num_test = total - (num_train + num_val)
+        #
+        # # set start indexes of train, validation, test
+        # self.startIdx['validation'] = num_train
+        # self.startIdx['test'] = num_train + num_val
+        #
+        # # set the number of each examples set ( proportion -> actual count )
+        # self.portion['train'] = num_train
+        # self.portion['validation'] = num_val
+        # self.portion['test'] = num_test
+        total = len(self.formed_examples)
+        num_train = int(total * (self.portion['train'] / 100))
+        num_val = int(total * (self.portion['validation'] / 100))
+        num_test = total - (num_train + num_val)
 
         # set start indexes of train, validation, test
-        self.startIdx['validation'] = train
-        self.startIdx['test'] = train + validation
+        self.startIdx['validation'] = num_train
+        self.startIdx['test'] = num_train + num_val
 
         # set the number of each examples set ( proportion -> actual count )
-        self.portion['train'] = train
-        self.portion['validation'] = validation
-        self.portion['test'] = test
+        self.portion['train'] = num_train
+        self.portion['validation'] = num_val
+        self.portion['test'] = num_test
 
-    def get_trainloader(self, set, batch_size) :
+    def get_trainloader(self, dataset, set, batch_size) :
         self.set = set # train/validation/test
-        trainloader = torch.utils.data.DataLoader(Dataset, batch_size=batch_size, shuffle=True, num_workers=0)
+        trainloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
         return trainloader
+
+    def get_examples_of(self, set) :
+        self.set = set
+
+        start = self.startIdx[set]
+        end = start + self.__len__(self)
+
+        return self.formed_examples[start:end],  self.indexed_examples[start:end]
