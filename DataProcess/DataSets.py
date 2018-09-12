@@ -33,7 +33,7 @@ class NewsDataset(Dataset):
             self.Vocab = Vocab
             self.formed_examples = self.__getProperExamples__(formed_examples, if_shuffle=True) # list of dictionaries of article, abstract pair
             self.setIdxes()  # sets the start indexes of each sets
-            self.indexed_examples = self.__index_examples__(self.formed_examples, tensor=True)
+            self.indexed_examples = self.__index_examples__(self.formed_examples, tensor=False)
 
             # self.indexed_examples = self.__make_dictionary__(self.indexed_examples) # dictionary version 'train', 'validation', 'test'
 
@@ -50,31 +50,33 @@ class NewsDataset(Dataset):
 
     def __getitem__(self, doc_idx):
         '''
-            - Highly recommended to use this function to
-            search out those of which don't meet the constraints
+            - get item from example for given index and then tensor it.
         '''
         example = self.indexed_examples[self.set][doc_idx]
+        example['article'] = torch.tensor(example['article'], requires_grad=False, device=self.device)
+        example['abstract'] = torch.tensor(example['abstract'], requires_grad=False, device=self.device)
+        example['label'] = torch.tensor(example['label'], requires_grad=False, device=self.device)
         return example
 
-    def __make_dictionary__(self, indexed_examples) :
-        Examples = {'train':[], 'validation':[], 'test':[]}
-        length = len(indexed_examples)
-        for i in range(0, self.startIdx['validation']) :
-            Examples['train'].append(indexed_examples[i])
-            indexed_examples[i] = None
-        for i in range(self.startIdx['validation'], self.startIdx['test']) :
-            Examples['validation'].append(indexed_examples[i])
-            indexed_examples[i] = None
-        for i in range(self.startIdx['test'], length) :
-            Examples['test'].append(indexed_examples[i])
-            indexed_examples[i] = None
-        # Examples['train'] = indexed_examples[:self.startIdx['validation']]
-        # Examples['validation'] = indexed_examples[self.startIdx['validation']:self.startIdx['test']]
-        # Examples['test'] = indexed_examples[self.startIdx['test']:]
-
-        indexed_examples = None
-        del indexed_examples
-        return Examples
+    # def __make_dictionary__(self, indexed_examples) :
+    #     Examples = {'train':[], 'validation':[], 'test':[]}
+    #     length = len(indexed_examples)
+    #     for i in range(0, self.startIdx['validation']) :
+    #         Examples['train'].append(indexed_examples[i])
+    #         indexed_examples[i] = None
+    #     for i in range(self.startIdx['validation'], self.startIdx['test']) :
+    #         Examples['validation'].append(indexed_examples[i])
+    #         indexed_examples[i] = None
+    #     for i in range(self.startIdx['test'], length) :
+    #         Examples['test'].append(indexed_examples[i])
+    #         indexed_examples[i] = None
+    #     # Examples['train'] = indexed_examples[:self.startIdx['validation']]
+    #     # Examples['validation'] = indexed_examples[self.startIdx['validation']:self.startIdx['test']]
+    #     # Examples['test'] = indexed_examples[self.startIdx['test']:]
+    #
+    #     indexed_examples = None
+    #     del indexed_examples
+    #     return Examples
 
     def __getProperExamples__(self, formed_examples, if_shuffle=True) :
         Proper_Examples = []

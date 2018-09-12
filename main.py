@@ -22,13 +22,15 @@ print("Done !!!")
 
 if True :
     # Call DataSet
+    print('before calling dataset allocated (dictionary): ', end=' ')
+    print(torch.cuda.memory_allocated(1))
     print("Obtaining Dataset .... ", end='')
     U.timeCheck('s', stime)
     data_examples_gen = DP.form_examples(Args.args.data_path, Args.args.train_size) # generator of article, abstract pair
     DataManager = DS.NewsDataset(data_examples_gen, Vocab, False) # dataset defined
     # DataManager = DS.NewsDataset(data_examples_gen, Vocab)  # dataset defined
     # U.saveExamples(DataManager.formed_examples)
-    # print(U.checkProportion(DataManager.formed_examples))
+    print(U.checkProportion(DataManager.formed_examples))
     del data_examples_gen
     print("Done !!!", end='     ')
     print(DataManager.portion)
@@ -36,10 +38,10 @@ if True :
 
 
 
-if False :
+if True :
     # Save Test Examples
     U.timeCheck('s', stime)
-    U.saveTestExamples()
+    U.saveTestExamples(DataManager)
     U.timeCheck('e', stime)
 
 
@@ -54,6 +56,8 @@ if False :
 
 if True :
     # Define Model
+    print('before calling model allocated (dictionary): ', end=' ')
+    print(torch.cuda.memory_allocated(1))
     print("Calling Model .... ", end = '')
     U.timeCheck('s', stime)
     if 'SCORE' in Args.args.model_name :
@@ -70,7 +74,6 @@ if True :
 if True :
     # Training Model
     print("Training Model .... ")
-    torch.cuda.empty_cache()  # for memory saving
     U.timeCheck('s', stime)
     print('memory allocated (dictionary): ', end=' ')
     print(torch.cuda.memory_allocated(1))
@@ -81,7 +84,7 @@ if True :
 
 
 
-if False :
+if True :
     # Save Model
     print("Saving Model .... ", end='')
     torch.save(NET, Args.args.model_name)
@@ -101,7 +104,7 @@ if False :
         referenced_id['trained'] = pickle.load(fp)
 
 
-if False :
+if True :
     # closed test Evaluation
     print("Evaluating .... ")
     U.timeCheck('s', stime)
@@ -110,7 +113,7 @@ if False :
     referenced_id['closed'] = Evaluation.Evaluation(trainloader, NET, referenced_id['trained'], type='closed')
 
 
-if False :
+if True :
     # Real test Evaluation
     print("Evaluating .... ")
     print("real test")

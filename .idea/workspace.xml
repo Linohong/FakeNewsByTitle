@@ -2,19 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a66fb0bf-0961-4698-8dba-c3612271733a" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/etc/Utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/FakeNewsByTitle.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/FakeNewsByTitle.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Args.py" beforeDir="false" afterPath="$PROJECT_DIR$/Args.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DataProcess/DataProcess.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataProcess/DataProcess.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DataProcess/DataSets.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataProcess/DataSets.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Train.py" beforeDir="false" afterPath="$PROJECT_DIR$/Train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/etc/TimeElapsed.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,7 +16,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/FakeNewsByTitle$Evaluation.coverage" NAME="Evaluation Coverage Results" MODIFIED="1534315302344" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/FakeNewsByTitle$BinaryToString.coverage" NAME="BinaryToString Coverage Results" MODIFIED="1532398096987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DataProcess" />
-    <SUITE FILE_PATH="coverage/FakeNewsByTitle$main.coverage" NAME="main Coverage Results" MODIFIED="1536719484666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/FakeNewsByTitle$main.coverage" NAME="main Coverage Results" MODIFIED="1536729622874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/FakeNewsByTitle$Data_Batch.coverage" NAME="Data&amp;Batch Coverage Results" MODIFIED="1532318937527" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DataProcess" />
     <SUITE FILE_PATH="coverage/FakeNewsByTitle$Model.coverage" NAME="Model Coverage Results" MODIFIED="1535009496778" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/FakeNewsByTitle$TestDataSet.coverage" NAME="TestDataSet Coverage Results" MODIFIED="1533642845153" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/DataProcess" />
@@ -50,33 +40,33 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="13" />
-          <entry key="py" value="16431" />
+          <entry key="py" value="16657" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="16444" />
+          <entry key="Python" value="16670" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="38" />
+          <entry key="py" value="39" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="38" />
+          <entry key="Python" value="39" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="818">
-              <caret line="77" column="28" lean-forward="true" selection-start-line="77" selection-start-column="28" selection-end-line="77" selection-end-column="28" />
+            <state relative-caret-position="176">
+              <caret line="41" column="24" lean-forward="true" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="24" />
               <folding>
                 <element signature="e#0#36#0" expanded="true" />
               </folding>
@@ -85,32 +75,50 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/DataProcess/DataProcess.py">
+        <entry file="file://$PROJECT_DIR$/etc/Utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="825">
-              <caret line="144" selection-start-line="144" selection-end-line="144" />
+            <state relative-caret-position="184">
+              <caret line="33" column="11" lean-forward="true" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="11" />
               <folding>
-                <element signature="e#678#689#0" expanded="true" />
+                <element signature="e#0#11#0" expanded="true" />
+                <marker date="1536134704386" expanded="true" signature="304:309" ph="..." />
+                <marker date="1536134704386" expanded="true" signature="854:855" ph="..." />
+                <marker date="1536134704386" expanded="true" signature="854:859" ph="..." />
+                <marker date="1536134704386" expanded="true" signature="1292:1501" ph="..." />
+                <marker date="1536134704386" expanded="true" signature="1539:1544" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/DataProcess/DataProcess.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-331">
+              <caret line="43" column="4" selection-start-line="43" selection-start-column="4" selection-end-line="43" selection-end-column="4" />
+              <folding>
+                <element signature="e#678#689#0" expanded="true" />
+                <marker date="1536728043195" expanded="true" signature="4058:4063" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/DataProcess/DataSets.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3695">
-              <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
+            <state relative-caret-position="1561">
+              <caret line="71" column="40" lean-forward="true" selection-start-line="71" selection-start-column="40" selection-end-line="71" selection-end-column="40" />
               <folding>
                 <element signature="e#287#298#0" expanded="true" />
-                <marker date="1536721573576" expanded="true" signature="1947:1953" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="1984:1993" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="2267:3193" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="3188:3193" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="3260:3269" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="5807:6076" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="8621:8627" ph="..." />
-                <marker date="1536721573576" expanded="true" signature="10421:10430" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="1948:1954" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="1985:1994" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="2527:3492" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="3487:3492" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="3559:3568" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="6106:6375" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="8920:8926" ph="..." />
+                <marker date="1536728534298" expanded="true" signature="10720:10729" ph="..." />
               </folding>
             </state>
           </provider>
@@ -119,8 +127,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
-              <caret line="7" selection-start-line="7" selection-end-line="7" />
+            <state relative-caret-position="345">
+              <caret line="24" column="13" lean-forward="true" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
               </folding>
@@ -152,8 +160,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1081">
-              <caret line="52" selection-start-line="52" selection-end-line="52" />
+            <state relative-caret-position="4583">
+              <caret line="210" column="20" lean-forward="true" selection-start-line="210" selection-start-column="20" selection-end-line="210" selection-end-column="20" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
                 <marker date="1535446145927" expanded="true" signature="7342:9598" ph="..." />
@@ -173,7 +181,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>batch.py</find>
       <find>FromString</find>
       <find>DPM</find>
       <find>data_path</find>
@@ -203,6 +210,7 @@
       <find>len</find>
       <find>getProper</find>
       <find>DataManager</find>
+      <find>cache</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -220,14 +228,14 @@
         <option value="$PROJECT_DIR$/DataProcess/TestDataSet.py" />
         <option value="$PROJECT_DIR$/etc/TimeElapsed.py" />
         <option value="$PROJECT_DIR$/etc/utils.py" />
-        <option value="$PROJECT_DIR$/DataProcess/DataProcess.py" />
         <option value="$PROJECT_DIR$/Model.py" />
         <option value="$PROJECT_DIR$/Evaluation.py" />
         <option value="$PROJECT_DIR$/Args.py" />
         <option value="$PROJECT_DIR$/etc/Utils.py" />
+        <option value="$PROJECT_DIR$/DataProcess/DataProcess.py" />
+        <option value="$PROJECT_DIR$/DataProcess/DataSets.py" />
         <option value="$PROJECT_DIR$/Train.py" />
         <option value="$PROJECT_DIR$/main.py" />
-        <option value="$PROJECT_DIR$/DataProcess/DataSets.py" />
       </list>
     </option>
   </component>
@@ -237,7 +245,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -399,7 +407,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="-epoch=20 -optim=&quot;RMSprop&quot; -batch_size=128 -train_size=2000000 -sent_num=72 -max_sent=40 -abs_num=3 -device=&quot;cuda:1&quot; -model_name=&quot;BILINEAR0015pre-2MTESTTEST&quot; -learning_rate=0.0015" />
+      <option name="PARAMETERS" value="-epoch=20 -optim=&quot;RMSprop&quot; -batch_size=128 -train_size=3000000 -sent_num=72 -max_sent=40 -abs_num=3 -device=&quot;cuda:1&quot; -model_name=&quot;BILINEAR0015pre-3M&quot; -learning_rate=0.0015" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -480,7 +488,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32899022" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49946696" weight="0.44625407" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49946696" visible="true" weight="0.44625407" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.4989339" weight="0.4820847" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -561,12 +569,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Train.py</url>
-          <line>15</line>
+          <line>16</line>
           <option name="timeStamp" value="94" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/Train.py</url>
-          <line>48</line>
+          <line>50</line>
           <option name="timeStamp" value="116" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -791,42 +799,6 @@ sys.getsizeof(DataManager)</expression-string>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1081">
-          <caret line="52" selection-start-line="52" selection-end-line="52" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-            <marker date="1535446145927" expanded="true" signature="7342:9598" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/etc/Utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="55" selection-start-line="55" selection-end-line="55" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-            <marker date="1536134704386" expanded="true" signature="304:309" ph="..." />
-            <marker date="1536134704386" expanded="true" signature="854:855" ph="..." />
-            <marker date="1536134704386" expanded="true" signature="854:859" ph="..." />
-            <marker date="1536134704386" expanded="true" signature="1292:1501" ph="..." />
-            <marker date="1536134704386" expanded="true" signature="1539:1544" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/DataProcess/DataProcess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="144" selection-start-line="144" selection-end-line="144" />
-          <folding>
-            <element signature="e#678#689#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2018.2/system/remote_sources/67334294/-1953636077/torch/autograd/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="161">
@@ -841,40 +813,77 @@ sys.getsizeof(DataManager)</expression-string>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/DataProcess/DataSets.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1561">
+          <caret line="71" column="40" lean-forward="true" selection-start-line="71" selection-start-column="40" selection-end-line="71" selection-end-column="40" />
+          <folding>
+            <element signature="e#287#298#0" expanded="true" />
+            <marker date="1536728534298" expanded="true" signature="1948:1954" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="1985:1994" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="2527:3492" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="3487:3492" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="3559:3568" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="6106:6375" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="8920:8926" ph="..." />
+            <marker date="1536728534298" expanded="true" signature="10720:10729" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DataProcess/DataProcess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-331">
+          <caret line="43" column="4" selection-start-line="43" selection-start-column="4" selection-end-line="43" selection-end-column="4" />
+          <folding>
+            <element signature="e#678#689#0" expanded="true" />
+            <marker date="1536728043195" expanded="true" signature="4058:4063" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
-          <caret line="7" selection-start-line="7" selection-end-line="7" />
+        <state relative-caret-position="345">
+          <caret line="24" column="13" lean-forward="true" selection-start-line="24" selection-start-column="13" selection-end-line="24" selection-end-column="13" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
+    <entry file="file://$PROJECT_DIR$/Model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="818">
-          <caret line="77" column="28" lean-forward="true" selection-start-line="77" selection-start-column="28" selection-end-line="77" selection-end-column="28" />
+        <state relative-caret-position="4583">
+          <caret line="210" column="20" lean-forward="true" selection-start-line="210" selection-start-column="20" selection-end-line="210" selection-end-column="20" />
           <folding>
-            <element signature="e#0#36#0" expanded="true" />
+            <element signature="e#0#12#0" expanded="true" />
+            <marker date="1535446145927" expanded="true" signature="7342:9598" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DataProcess/DataSets.py">
+    <entry file="file://$PROJECT_DIR$/etc/Utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3695">
-          <caret line="212" lean-forward="true" selection-start-line="212" selection-end-line="212" />
+        <state relative-caret-position="184">
+          <caret line="33" column="11" lean-forward="true" selection-start-line="33" selection-start-column="11" selection-end-line="33" selection-end-column="11" />
           <folding>
-            <element signature="e#287#298#0" expanded="true" />
-            <marker date="1536721573576" expanded="true" signature="1947:1953" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="1984:1993" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="2267:3193" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="3188:3193" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="3260:3269" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="5807:6076" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="8621:8627" ph="..." />
-            <marker date="1536721573576" expanded="true" signature="10421:10430" ph="..." />
+            <element signature="e#0#11#0" expanded="true" />
+            <marker date="1536134704386" expanded="true" signature="304:309" ph="..." />
+            <marker date="1536134704386" expanded="true" signature="854:855" ph="..." />
+            <marker date="1536134704386" expanded="true" signature="854:859" ph="..." />
+            <marker date="1536134704386" expanded="true" signature="1292:1501" ph="..." />
+            <marker date="1536134704386" expanded="true" signature="1539:1544" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="41" column="24" lean-forward="true" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#36#0" expanded="true" />
           </folding>
         </state>
       </provider>

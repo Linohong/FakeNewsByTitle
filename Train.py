@@ -2,6 +2,7 @@ import torch.optim as optim
 import torch.nn as nn
 import Args
 import etc.Utils as U
+import torch
 stime = [None]
 
 def Train(trainloader, NET) :
@@ -24,6 +25,7 @@ def Train(trainloader, NET) :
     ides = []
 
     for epoch in range(Args.args.epoch) :
+        torch.cuda.empty_cache()  # for memory saving
         loss_total = 0.0
         samCnt = 0
 

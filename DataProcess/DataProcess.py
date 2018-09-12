@@ -110,26 +110,42 @@ def text_generator(example_generator):
 
 
 def form_examples(data_path, max=None):
+    # """Reads data from file and processes into Examples which are then placed into the example queue."""
+    #
+    # input_gen = text_generator(example_generator(data_path, max))
+    # Examples = []
+    #
+    # for id, (article, abstract) in enumerate(input_gen):  # read the next example from file. article and abstract are both strings.
+    #     abstract_list = [sent.strip() for sent in abstract2sents(
+    #         abstract.decode("utf-8"))]  # abstract is byte type in python3, so convert it to a string type
+    #                                     # Use the <s> and </s> tags in abstract to get a list of sentences.
+    #     article_list = sent_tokenize(article.decode("utf-8"))
+    #     Examples.append({'article':article_list, 'abstract':abstract_list, 'label':[1., 0.], 'id':id}) # label : [pos, neg] - 1 hot style
+    #
+    # # Labelize Examples
+    # # Examples = labelize_examples(Examples)
+    # Examples = labelize_examples(Examples)
+    #
+    # return Examples
     """Reads data from file and processes into Examples which are then placed into the example queue."""
 
     input_gen = text_generator(example_generator(data_path, max))
     Examples = []
 
-    for id, (article, abstract) in enumerate(input_gen):  # read the next example from file. article and abstract are both strings.
+    for id, (article, abstract) in enumerate(
+            input_gen):  # read the next example from file. article and abstract are both strings.
         abstract_list = [sent.strip() for sent in abstract2sents(
             abstract.decode("utf-8"))]  # abstract is byte type in python3, so convert it to a string type
-                                        # Use the <s> and </s> tags in abstract to get a list of sentences.
+        # Use the <s> and </s> tags in abstract to get a list of sentences.
         article_list = sent_tokenize(article.decode("utf-8"))
-        Examples.append({'article':article_list, 'abstract':abstract_list, 'label':[1., 0.], 'id':id}) # label : [pos, neg] - 1 hot style
+        Examples.append({'article': article_list, 'abstract': abstract_list, 'label': [1., 0.],
+                         'id': id})  # label : [pos, neg] - 1 hot style
 
     # Labelize Examples
     # Examples = labelize_examples(Examples)
     Examples = labelize_examples(Examples)
 
     return Examples
-        # abstract_sentences = [sent.strip() for sent in abstract2sents(abstract)]  # Use the <s> and </s> tags in abstract to get a list of sentences.
-        # example = Example(article, abstract_sentences, self._vocab, self._hps)  # Process into an Example.
-        # self._example_queue.put(example)  # place the Example in the example queue.
 
 def labelize_examples(formed_examples, fake_num=None) :
     '''
